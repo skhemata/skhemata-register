@@ -1,0 +1,27 @@
+## editors
+/.idea
+/.vscode
+
+## system files
+.DS_Store
+
+## build
+dist
+
+## npm
+node_modules
+/node_modules/
+/npm-debug.log
+
+## testing
+/coverage/
+
+## temp folders
+/.tmp/
+
+# build
+/_site/
+/out-tsc/
+/dist/
+
+storybook-static

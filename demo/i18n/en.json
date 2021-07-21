@@ -1,0 +1,12 @@
+{
+    "firstname_label": "First Name *",
+    "lastname_label": "Last Name *",
+    "email_label": "Email *",
+    "password_label": "Password *",
+    "password_confirm_label": "Confirm Password *",
+    "button_label": "Register",
+    "button_loading_label": "Please wait...",
+    "bad_request": "Something's wrong. Double check your form and try again.",
+    "unknown_error": "An unknown error occurred, please reload",
+    "password_match_error": "Passwords do not match!"
+}
