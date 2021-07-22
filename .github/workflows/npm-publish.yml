@@ -34,5 +34,5 @@ jobs:
       - run: npm ci
       - run: npm publish --tag latest
         if: "!github.event.release.prerelease"
-      - run: npm --publish --tag dev
+      - run: npm publish --tag dev
         if: "github.event.release.prerelease"
