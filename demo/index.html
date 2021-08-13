@@ -18,7 +18,7 @@
     const title = 'Hello owc World!';
     render(
       html`
-        <skhemata-register translation-dir="i18n/" translation-lang="en" api-url="https://arcadia.thrinacia.com/service/restv1/register">
+        <skhemata-register .api=${{url: 'http://localhost:3000/service/restv1'}}>
         </skhemata-register>
       `,
       document.querySelector('#demo')

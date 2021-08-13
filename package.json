@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/skhemata/skhemata-register.git"
   },
-  "keywords": [ 
+  "keywords": [
     "skhemata",
     "register",
     "web component"
@@ -18,19 +18,21 @@
   "scripts": {
     "start": "concurrently --kill-others --names tsc,web-dev-server \"npm run tsc:watch\" \"web-dev-server --app-index demo/index.html --node-resolve --open --watch\"",
     "tsc:watch": "tsc --watch",
-    "prepublish": "tsc"
+    "prepare": "tsc",
+    "build": "tsc",
+    "test": "tsc"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@open-wc/lit-helpers": "^0.3.12",
     "@open-wc/scoped-elements": "^1.3.3",
+    "@skhemata/skhemata-base": "^1.2.1",
+    "@skhemata/skhemata-form": "^1.3.0",
+    "@types/quill": "^2.0.9",
     "fa-icons": "^0.2.0",
-    "lit-element": "^2.2.1",
-    "lit-html": "^1.1.2",
-    "lit-translate": "^1.2.1",
-    "skhemata-css": "git+ssh://git@ark.skhemata.com/skhemata-css",
-    "skhemata-form": "git+ssh://git@ark.skhemata.com/skhemata-form"
+    "lit-html": "^2.0.0-rc.3",
+    "lit-translate": "^1.2.1"
   },
   "devDependencies": {
     "@types/node": "13.11.1",

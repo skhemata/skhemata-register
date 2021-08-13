@@ -1,145 +1,109 @@
-import { html, css, LitElement, property } from 'lit-element';
-import { get, registerTranslateConfig, use } from 'lit-translate';
-import { Bulma } from 'skhemata-css';
+import { html, css, SkhemataBase, property, CSSResult } from '@skhemata/skhemata-base';
+import {
+  SkhemataForm,
+  SkhemataFormTextbox,
+  SkhemataFormButton,
+} from '@skhemata/skhemata-form';
+import { SkhemataRegisterStyle } from './style/SkhemataRegisterStyle';
+import { defaultTranslationEng } from './translation/eng';
 
-export class SkhemataRegister extends LitElement {
+export class SkhemataRegister extends SkhemataBase {
 
-  @property({ type: String, attribute: 'api-url' })
-  postUrl = '';
-
-  @property({type: String, attribute: 'translation-dir'})
-  translationsDirectory = '';
-
-  @property({type: String, attribute: 'translation-lang'})
-  translationsLang = 'en';
-
-  constructor() {
-    super();
-    registerTranslateConfig({
-      loader: lang => fetch(`${this.translationsDirectory}${lang}.json`).then(res => {
-        return res.json();
-      })
-    });
-  }
-
-  // Defer the first update of the component until the strings has been loaded to avoid empty strings being shown
-  hasLoadedStrings = false;
-  protected shouldUpdate (changedProperties: any) {
-    return this.hasLoadedStrings && super.shouldUpdate(changedProperties);
-  }
-
-  async connectedCallback() {
-    await use(this.translationsLang);
-    this.hasLoadedStrings = true;
-    super.connectedCallback();
-  }
-
-  static get styles(){
-    return [
-      Bulma
-    ]
-  }
+  @property({type: Object})
+  translationData = {
+    eng: defaultTranslationEng
+  }; 
 
   @property({type: String})
   errorMessage = "";
 
+  @property({type: String})
+  successMessage = "";
+
   @property({type: Boolean})
   signingUp = false;
+
+  private isLoading = false;
+
+  static get scopedElements() {
+    return {
+      'sf-form': SkhemataForm,
+      'sf-textbox': SkhemataFormTextbox,
+      'sf-button': SkhemataFormButton,
+    }
+  }
+
+  static get styles() {
+    return <CSSResult[]> [
+      ...super.styles,
+      SkhemataRegisterStyle
+    ];
+  }
 
   validate = (json: any) => {
     var pw = json.password as string;
     var pwc = json.password_confirm as string;
-    if (pw !== pwc) return { error: true, message: get('password_match_error')};
+    if (pw !== pwc) return { error: true, message: 'password_match_error'};
     return {error:false, message:""};
   }
 
   handleSubmit = (e: any) => {
-    e.preventDefault();
-    const form = this.shadowRoot?.querySelector('form')!;
-    const formData = new FormData(form);
-    const formJson = Object.fromEntries(formData);
-    
-    //client side form validation
-    var validation = this.validate(formJson);
-    console.log(formJson);
-    console.log(validation);
-    if (validation.error) {
-      this.errorMessage = validation.message;
-      return;
-    }
-    
-    this.signingUp = true;
+    const form = e.detail.data;
+    this.isLoading = true;
+    this.requestUpdate();
+    this.skhemata?.register({
+      first_name: form.firstName,
+      last_name: form.lastName,
+      email: form.email,
+      password: form.password,
+      password_confirm: form.passwordConfirm,
+    }).then(() => {
+      this.isLoading = false;
+      this.successMessage = this.getStr('SkhemataRegister.registrationSuccessful')
+      this.requestUpdate();
+    }).catch((err) => {
+      this.isLoading = false;
+      this.errorMessage = this.getStr('SkhemataRegister.registrationFailed')
+    });
 
-    fetch(this.postUrl,{
-        method: 'post',
-        body: JSON.stringify(formJson)
-    })
-    .then(res => {
-      this.signingUp = false;
-      if (res.ok) {
-        this.clearMessage();
-        return res;
-      }
-      if (res.status == 400) {
-        this.errorMessage = get('bad_request');
-        return res;
-      }
-      this.errorMessage = get('unknown_error');
-      return res;
-    })
-    
   }
 
   clearMessage = () => {
     this.errorMessage = "";
   }
+  
+  async firstUpdated(){
+    await super.firstUpdated();
+    console.log(this.translationData);
+    console.log(this.translationLang);
+    console.log(this.getStr('SkhemataRegister.firstName'))
+  }
 
   render() {
     return html`
-
-    <form class="control is-family-primary is-fullwidth login-form" @submit="${this.handleSubmit}">
-        <div class = "field">
-          <p class = "control">
-            <label class = "label">${get('firstname_label')}</label>
-            <input id = "email_input" class = "input is-fullwidth" type="text" name="first_name"></input>
-          </p>
-        </div>
-        <div class = "field">
-          <p class = "control">
-            <label class = "label">${get('lastname_label')}</label>
-            <input id = "email_input" class = "input is-fullwidth" type="text" name="last_name"></input>
-          </p>
-        </div>
-        <div class = "field">
-          <p class = "control">
-            <label class = "label">${get('email_label')}</label>
-            <input id = "email_input" class = "input is-fullwidth" type="email" name="email"></input>
-          </p>
-        </div>
-        <div class = "field">
-          <p class = "control">
-            <label class = "label">${get('password_label')}</label>
-            <input class = "input is-fullwidth" type="password" name="password"></input>
-          </p>
-        </div>
-        <div class = "field">
-          <p class = "control">
-            <label class = "label">${get('password_confirm_label')}</label>
-            <input class = "input is-fullwidth" type="password" name="password_confirm"></input>
-          </p>
-        </div>
-        <div class = "tile">
-          <p class = "control">
-            <button class = "input button is-success is-fullwidth" type="submit">${this.signingUp ? get('button_loading_label') : get('button_label')}</button>
-          </p>
-        </div>
-    </form>
+    <sf-form class="control is-family-primary is-fullwidth login-form" @submit="${this.handleSubmit}">
+      <sf-textbox label="${this.getStr('SkhemataRegister.firstName')}" name="firstName" required></sf-textbox>
+      <sf-textbox label="${this.getStr('SkhemataRegister.lastName')}" name="lastName" required></sf-textbox>
+      <sf-textbox label="${this.getStr('SkhemataRegister.email')}" name="email" required></sf-textbox>
+      <sf-textbox label="${this.getStr('SkhemataRegister.password')}" name="password" type="password" required></sf-textbox>
+      <sf-textbox label="${this.getStr('SkhemataRegister.confirmPassword')}" name="passwordConfirm" type="password" required></sf-textbox>
+      <sf-button type="submit" title="${ this.isLoading ? '' : this.getStr('SkhemataRegister.submit')}" isfullwidth></sf-button>
+    </sf-form>
     ${
       this.errorMessage.length > 0 
         ? html`
             <div class="is-family-primary notification is-danger mt-4">
               <a class="delete" @click=${this.clearMessage}></a>
               ${this.errorMessage}
+            </div>` 
+        : ''
+    }
+    ${
+      this.successMessage.length > 0 
+        ? html`
+            <div class="is-family-primary notification is-success mt-4">
+              <a class="delete" @click=${this.clearMessage}></a>
+              ${this.successMessage}
             </div>` 
         : ''
     }
